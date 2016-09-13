@@ -33,7 +33,7 @@ int main()
 
 	// Create the renderer that we use for drawing
 	// Associate if with a window, the index of the rendering driver, addional flags for the renderer
-	ren = SDL_CreateRenderer( win, 0, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC );
+	ren = SDL_CreateRenderer( win, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC );
 	if( !ren )
 	{
 		SDL_DestroyWindow( win );
