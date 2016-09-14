@@ -8,7 +8,8 @@ Notes on the C++ language and some choice libraries, to help me remember things.
 	- basic .bmp rendering
 	- SDL2_Image (png, jpg, etc.)
 	- basic OpenGL
-	- delta time
+	- ~~variable delta time~~
+	- fixed delta time
 	- basic sdl2 audio features (playing wav, volume maybe, anything else?)
 	- controller input (PS3, PS4, XBox 360, XBox One, Wii?)
 		- Rumble and audio out too?
