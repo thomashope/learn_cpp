@@ -34,6 +34,10 @@
 // feel free to omit the components you don't use sure as `-lBulletSoftBody`
 // NOTE: if you already installed SDL2 as a framework simply replace `-l SDL2` with `-framework SDL2`
 
+// TODO: setup and compile on windows
+// TODO: setup and compile on linux
+// TODO: override drawLine in btIDebugDraw and use it for debug drawing
+
 const int WIDTH = 640;
 const int HEIGHT = 480;
 SDL_Window* win;
@@ -41,8 +45,6 @@ SDL_GLContext context;
 
 // A vector for our convinience we can iterate over
 std::vector<btRigidBody*> bodies;
-
-// TODO: override drawLine in btIDebugDraw and use it for debug drawing
 
 struct PhysicsWorld
 {
@@ -175,13 +177,11 @@ bool init()
     SDL_GL_SetSwapInterval( 1 );
 
     // Setup OpenGL
+    glClearColor( 0.5f, 0.6f, 0.9f, 1.0f ); // Clear background to sky blue
+    glClearDepth( 1.0f );                   // Clear the depth buffer each frame
     glShadeModel( GL_SMOOTH );
-    glClearColor( 0.0f, 0.0f, 0.0f, 1.0f );
-    glClearDepth( 1.0f );
     glEnable( GL_DEPTH_TEST );
     glDepthFunc( GL_LEQUAL );
-    glEnable( GL_BLEND );
-    glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
     glHint( GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST );
 
     /* Setup our viewport. */
@@ -203,7 +203,7 @@ bool init()
 void render_sphere( btRigidBody* sphere )
 {
     GLUquadricObj* quad = gluNewQuadric();
-    glColor3f( 0.8, 0.8, 0.8 );
+    glColor3f( 0.3, 0.3, 0.3 );
     float radius = ((btSphereShape*)sphere->getCollisionShape())->getRadius();
     btTransform t;
     sphere->getMotionState()->getWorldTransform( t );
@@ -211,7 +211,7 @@ void render_sphere( btRigidBody* sphere )
     t.getOpenGLMatrix( matrix );    // Stores the rotation and position
     glPushMatrix();
         glMultMatrixf( matrix );
-        gluSphere( quad, radius, 20, 20 );
+        gluSphere( quad, radius, 16, 16 );
     glPopMatrix();
     gluDeleteQuadric( quad );
 }
@@ -258,6 +258,7 @@ int main()
     float dt = 1.0f / 60.0f;
     while( !done )
     {
+        // Handle Events
         while( SDL_PollEvent( &event ) )
         {
             switch( event.type )
@@ -299,6 +300,7 @@ int main()
             switch( bodies[i]->getCollisionShape()->getShapeType() )
             {
                 case STATIC_PLANE_PROXYTYPE:
+                    // TODO: switch to render plane function
                 break;
                 case SPHERE_SHAPE_PROXYTYPE:
                     render_sphere( bodies[i] );
@@ -310,12 +312,13 @@ int main()
 
         // Draw the ground plane
         glBegin( GL_QUADS );
-            glColor3f( 0.1, 0.1, 0.1 );
+            glColor3f( 0.1, 0.7, 0.3 );
+            glNormal3f( 0, 1, 0 );
             glVertex3f( -100, 0,  100 );
             glVertex3f( -100, 0, -100 );
             glVertex3f(  100, 0, -100 );
             glVertex3f(  100, 0,  100 );
-        glEnd( );
+        glEnd();
 
         // Step the physics simulation
         // The btDiscreteDynamicsWorld automatically takes into account variable timestep by performing interpolation
