@@ -37,9 +37,10 @@
 // TODO: setup and compile on windows
 // TODO: setup and compile on linux
 // TODO: override drawLine in btIDebugDraw and use it for debug drawing
+// TODO: fix depracated glu functon warnings on osx
 
-const int WIDTH = 640;
-const int HEIGHT = 480;
+const int WIDTH = 800;
+const int HEIGHT = 600;
 SDL_Window* win;
 SDL_GLContext context;
 
