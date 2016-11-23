@@ -19,11 +19,13 @@
 //
 // If you don't have it, install homebrew http://brew.sh
 // run:
+//  $ xcode-select --install
 //  $ brew update
+//  $ brew install glew
 //  $ brew install bullet
 //  $ brew install SDL2
 //
-// This should install bullet and SDL2 and link them into /usr/local/lib/ and /usr/local/include/
+// This should install the command line tools, glew.h, bullet and SDL2 and link them into /usr/local/lib/ and /usr/local/include/
 // The OpenGL frmaework should be installed by default on OSX
 //
 //  $ clang++ *.cpp -framework OpenGL -l SDL2 -lBulletSoftBody -lBulletDynamics -lBulletCollision -lLinearMath -I /usr/local/include/bullet/

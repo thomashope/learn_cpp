@@ -2,6 +2,12 @@
 #include <Box2D/Box2D.h>
 #include <iostream>
 
+// $ c++ main.cpp -l SDL2 -l Box2D
+//
+// download the zip from github, compile the project using xcode
+// Drop the libBox2d.a into /usr/local/lib/
+// Drop headers in the folder Box2D into /usr/local/include/
+
 const int WIDTH = 800;
 const int HEIGHT = 600;
 SDL_Window* win;

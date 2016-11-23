@@ -1,6 +1,7 @@
 #include <SDL2/SDL.h>
 #include <iostream>
 #include <vector>
+#include <algorithm>
 
 SDL_Window* win = NULL;
 SDL_Renderer* ren = NULL;
@@ -85,11 +86,25 @@ void draw()
         points.back().b = rand() % 256;
     }
 
+    // For every pixel
     // Find the closest point to each pixel
     for( int y = 0; y < HEIGHT; y++ )
     {
         for( int x = 0; x < WIDTH; x++ )
         {
+            
+            // This version requires `-std=c++14`
+            // It's also really slow unless you enable optimisations with `-O3`
+            /*
+            const auto p = std::min_element( begin(points), end(points),
+                     [x, y](const auto& a, const auto& b)
+                     { return pow(a.x - x, 2) + pow(a.y - y, 2) < pow(b.x - x, 2) + pow(b.y - y, 2); } );
+
+            SDL_SetRenderDrawColor( ren, p->r, p->g, p->b, 255 );
+            SDL_RenderDrawPoint( ren, x, y );
+            //*/
+
+            //*
             float dist_squared = WIDTH * WIDTH + HEIGHT * HEIGHT;
             int closest_point = 0;
 
@@ -107,6 +122,8 @@ void draw()
 
             SDL_SetRenderDrawColor( ren, points[closest_point].r, points[closest_point].g, points[closest_point].b, 255 );
             SDL_RenderDrawPoint( ren, x, y );
+            //*/
+
         }
     }
 
