@@ -17,7 +17,17 @@ Notes on the C++ language and some choice libraries, to help me remember things.
 		- Motion sensors?
 		- Button pressure?
 - 2d physics
+	- ~~basic box2d example~~
+	- box2d joints
+	- 2d collision from scatch
 - 3d physics
+	- ~~basic bullet physics example~~
+	- 3d collison from scatch
+- scripting
+	- ~~calling lua from c~~
+	- ~~calling c from lua~~
+	- try luaJIT?
+	- passing more complex types?
 - searching / sorting
 	- lee
 	- A*
