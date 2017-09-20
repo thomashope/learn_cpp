@@ -10,8 +10,11 @@
 //
 // Compile with `clang++ -lsdl2 main.cpp`
 
+const int BITMAP_SIZE = 512;
+
 SDL_Window* win;
 SDL_Renderer* ren;
+SDL_Texture* font_texture;
 
 bool init();
 void shutdown();
@@ -24,38 +27,77 @@ int main()
 		return -1;
 	}
 
-	const int BITMAP_SIZE = 512;
-	unsigned char bitmap[512*512];
+	//
+	// We will create our bitmap buffer with space for 4 channels of 8bpp, even
+	// though stb_truetype only renders 1 greyscale channel, you'll see why in a second
+	//
 
-	const int FIRST_CHAR = 32;
-	const int NUM_CHARS = 95;
-	stbtt_bakedchar font_atlas[NUM_CHARS];
-
-	const char* font_filename = "/Library/Fonts/Arial.ttf";
-	unsigned char* font_buffer = readEntireFile(font_filename);
-
-	if( font_buffer )
 	{
-		int result = stbtt_BakeFontBitmap(font_buffer, 0,
-			64.0f,
-			bitmap, BITMAP_SIZE, BITMAP_SIZE,
-			FIRST_CHAR, NUM_CHARS,
-			font_atlas);
+		unsigned char font_bitmap[512*512*4];
 
-		if(result > 0)
+		const int FIRST_CHAR = 32;
+		const int NUM_CHARS = 95;
+		stbtt_bakedchar font_atlas[NUM_CHARS];
+
+		const char* font_filename = "/Library/Fonts/Arial.ttf";
+		unsigned char* font_buffer = readEntireFile(font_filename);
+
+		if( font_buffer )
 		{
-			SDL_Log("Baked font '%s' OK", font_filename);
+			int result = stbtt_BakeFontBitmap(font_buffer, 0,
+				64.0f,
+				font_bitmap, BITMAP_SIZE, BITMAP_SIZE,
+				FIRST_CHAR, NUM_CHARS,
+				font_atlas);
+
+			if(result > 0)
+			{
+				SDL_Log("Baked font '%s' OK", font_filename);
+			}
+			else
+			{
+				SDL_Log("Error baking font '%s'", font_filename);
+			}
+
+			delete[] font_buffer;
 		}
 		else
 		{
-			SDL_Log("Error baking font '%s'", font_filename);
+			return -1;
 		}
 
-		delete[] font_buffer;
-	}
-	else
-	{
-		return -1;
+		//
+		// Now stb_truetype has rendered a greyscale font into memory, we will convert
+		// it to a format SDL can easily accept
+		//
+
+		for( int grey_index = BITMAP_SIZE * BITMAP_SIZE - 1; grey_index >= 0; grey_index-- )
+		{
+			int rgba_index = grey_index * 4 - 1;
+			int colour = font_bitmap[grey_index];
+
+			font_bitmap[rgba_index  ] = colour;
+			font_bitmap[rgba_index-1] = 255;
+			font_bitmap[rgba_index-2] = 255;
+			font_bitmap[rgba_index-3] = 255;
+		}
+
+		//
+		// Now create the texture and upload the font data
+		//
+
+		font_texture = SDL_CreateTexture( ren,
+			SDL_PIXELFORMAT_RGBA32,
+			SDL_TEXTUREACCESS_STATIC,
+			BITMAP_SIZE, BITMAP_SIZE );
+
+		if( SDL_UpdateTexture( font_texture, NULL, font_bitmap, BITMAP_SIZE * 4 ) )
+		{
+			SDL_Log("Error creating texture from font '%s'", font_filename);
+			return -1;
+		}
+
+		SDL_SetTextureBlendMode( font_texture, SDL_BLENDMODE_BLEND );
 	}
 
 	bool done = false;
@@ -70,21 +112,7 @@ int main()
 		SDL_SetRenderDrawColor(ren, 0, 0, 0, 255);
 		SDL_RenderClear(ren);
 
-		SDL_Point p;
-		unsigned char c = 0;
-
-		for( int y = 0; y < BITMAP_SIZE; y++ )
-		{
-			for( int x = 0; x < BITMAP_SIZE; x++ )
-			{
-				p.x = x;
-				p.y = y;
-				c = bitmap[y * BITMAP_SIZE + x];
-
-				SDL_SetRenderDrawColor( ren, c, c, c, c );
-				SDL_RenderDrawPoints( ren, &p, 1 );
-			}
-		}
+		SDL_RenderCopy( ren, font_texture, NULL, NULL );
 
 		SDL_RenderPresent(ren);
 	}
