@@ -1,0 +1,1 @@
+time c++ -framework sdl2 $1 -std=c++14 -Wall -Wextra
