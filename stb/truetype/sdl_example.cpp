@@ -1,4 +1,5 @@
 #include <SDL2/SDL.h>
+#include <string>
 
 #define STB_RECT_PACK_IMPLEMENTATION
 #include "stb_rect_pack.h"
@@ -13,15 +14,22 @@
 //
 // Compile with `clang++ -lsdl2 main.cpp`.
 //
+// For more of a tutorial on text input with SDL see:
+// https://wiki.libsdl.org/Tutorials/TextInput
+//
 
 //
 // Constants
 //
 
-const int BITMAP_SIZE = 512;     // Width and height of the bitmap I want to pack my font into
-const int FIRST_CHAR  =  32;     // 32 corresponts to a space char in ASCII
-const int NUM_CHARS   =  95;     // I want to get the 95 charaters following an ASCII space
-const float CHAR_HEIGHT = 32.0f; // Height of a character in pixels
+const int WINDOW_WIDTH    =  640;
+const int WINDOW_HEIGHT   =  480;
+
+const int BITMAP_SIZE     =  256; // Width and height of the bitmap I want to pack my font into
+const int FIRST_CHAR      =   32; // 32 corresponts to a space char in ASCII
+const int NUM_CHARS       =   95; // I want to get the 95 charaters following an ASCII space
+const int TEXT_MAX_LENGTH = 1024; // The maximum size of our input string
+const float CHAR_HEIGHT   = 28.0f; // Height of a character in pixels
 
 //
 // Globals
@@ -37,7 +45,7 @@ stbtt_bakedchar char_data[NUM_CHARS];
 // Function forward declarations
 //
 
-void drawString( const char* str, float x, float y );
+void drawString( const std::string& str, float x, float y );
 
 unsigned char* readEntireFile( const char* filename );
 
@@ -89,6 +97,13 @@ int main()
 		font_texture = createRGBA32TextureFromGreyscaleData( font_bitmap );
 	}
 
+	//
+	// We call this function to let SDL konw want to receive text related events
+	//
+
+	SDL_StartTextInput();
+
+	std::string input_text = "Start typing... ";
 	bool done = false;
 	SDL_Event e;
 	while( !done )
@@ -96,6 +111,27 @@ int main()
 		while( SDL_PollEvent(&e) )
 		{
 			if( e.type == SDL_QUIT ) done = true;
+			else if( e.type == SDL_TEXTINPUT )
+			{
+				if( input_text.length() + strlen(e.text.text) <= TEXT_MAX_LENGTH )
+				{
+					input_text += std::string(e.text.text);
+				}
+			}
+			else if( e.type == SDL_KEYDOWN )
+			{
+				if( e.key.keysym.sym == SDLK_BACKSPACE )
+				{
+					if( input_text.length() > 0 )
+					{
+						input_text.pop_back();
+					}
+				}
+				else if( e.key.keysym.sym == SDLK_RETURN )
+				{
+					input_text.push_back('\n');
+				}
+			}
 		}
 
 		SDL_SetRenderDrawColor( ren, 0, 0, 0, 255 );
@@ -103,14 +139,21 @@ int main()
 
 		// Render the whole font texture so we can see what we got.
 
-		SDL_RenderCopy( ren, font_texture, NULL, NULL );
+		SDL_Rect dest = { 5, 5, BITMAP_SIZE, BITMAP_SIZE };
+		SDL_RenderCopy( ren, font_texture, NULL, &dest );
+		SDL_SetRenderDrawColor( ren, 255, 255, 255, 255 );
+		SDL_RenderDrawRect( ren, &dest );
 
 		// A handy little draw string function
 
-		drawString( "It's you Erica,\nit's always been you.", 20.0f, 200.0f );
+		drawString( "<- This is the font texture\nstb_truetype just made for us", 280.0f, 50.0f );
+
+		drawString( input_text, 5.0f, 300.0f );
 
 		SDL_RenderPresent(ren);
 	}
+
+	SDL_StopTextInput();
 
 	shutdown();
 
@@ -118,21 +161,13 @@ int main()
 	return 0;
 }
 
-void drawString( const char* str, float x, float y )
+void drawString( const std::string& str, float x, float y )
 {
 	const float start_x = x;
 
-	//
-	// Loop over the entire string until we hit a NULL char.
-	//
-	// This is good enough for this example, but in practice is a bad idea.
-	// What if our string has an escaped NULL char embedded in it?
-	// Or worse, no terminating NULL char at all?
-	//
-
-	for( const char* c = str; *c != 0; c++ )
+	for( const char& c : str )
 	{
-		if( *c == '\n' )
+		if( c == '\n' )
 		{
 			x = start_x;
 			y += CHAR_HEIGHT;
@@ -140,7 +175,7 @@ void drawString( const char* str, float x, float y )
 		}
 
 		stbtt_aligned_quad char_rect;
-		int char_index = (*c) - FIRST_CHAR;
+		int char_index = c - FIRST_CHAR;
 
 		stbtt_GetBakedQuad(
 			char_data,
@@ -149,6 +184,25 @@ void drawString( const char* str, float x, float y )
 			&x, &y,
 			&char_rect,
 			true );
+
+		if( char_rect.x1 > WINDOW_WIDTH )
+		{
+			//
+			// If the right hand edge of our new char will be off screen,
+			// reset the x position, increment the y position, and try again.
+			//
+
+			x = start_x;
+			y += CHAR_HEIGHT;
+
+			stbtt_GetBakedQuad(
+				char_data,
+				BITMAP_SIZE, BITMAP_SIZE,
+				char_index,
+				&x, &y,
+				&char_rect,
+				true );
+		}
 
 		//
 		// The resulting points s0, t0, s1, t0 are in texture coordinates
@@ -238,7 +292,7 @@ bool init()
 
 	// Create the window
 	// Set the title, position x y, resolution width height, and then additional flags
-	win = SDL_CreateWindow( __FILE__, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 512, 512, SDL_WINDOW_SHOWN );
+	win = SDL_CreateWindow( __FILE__, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_SHOWN );
 	if( !win )
 	{
 		SDL_Log("ERROR: could not create window '%s'", SDL_GetError());
