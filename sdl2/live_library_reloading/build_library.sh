@@ -1,0 +1,1 @@
+time clang++ library.cpp -lsdl2 -Wall -std=c++14 -dynamiclib -o libgame.dylib
