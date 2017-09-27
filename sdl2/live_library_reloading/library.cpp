@@ -2,12 +2,19 @@
 #include <SDL2/sdl.h>
 
 //
-// Compile this as a library with `clang++ -dynamiclib library.cpp -o libgame.dylib`
+// Compile this as a library with `clang++ library.cpp -lsdl2 -std=c++14 -dynamiclib -o libgame.dylib`
+// Optionaly add `-Wall -Wextra` for more warnings, and `-g` for debugging info
+//
 //
 // If all is working you should be able to recompile this while the game is
 // running and see your changes happen live. If you're not sure what to do
 // try changing the variables in the player struct or some of the colours
 // in the render function.
+//
+// Debugging with Xcode is possible too. Create a new workspace then add new scheme.
+// In the scheme dialogue that pops up under 'run/executable' select 'other' then find this
+// executable. You can then add your source files and run the project from Xcode to use
+// the debugging features like a normal Xcode project.
 //
 
 #define LINK extern "C"

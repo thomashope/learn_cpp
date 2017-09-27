@@ -86,7 +86,11 @@ int main()
 			{
 				// The time modified changed, so we should reload the library 
 
-				SDL_UnloadObject( libgame );
+				if( libgame )
+				{
+					SDL_UnloadObject( libgame );
+				}
+
 				libgame = SDL_LoadObject( LIB_FILENAME );
 				if( libgame == NULL )
 				{
@@ -98,11 +102,12 @@ int main()
 
 				if( !getLibraryFunctions() )
 				{
+					SDL_Log("Error failed to get library functions");
 					break;
 				}
 
 				lastTimeModified = currentTimeModified;
-				SDL_Log("Reloaded %s at time %i", LIB_FILENAME, currentTimeModified);
+				SDL_Log("Loaded %s last modified at %i", LIB_FILENAME, currentTimeModified);
 			}
 		}
 
