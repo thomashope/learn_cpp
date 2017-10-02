@@ -146,9 +146,9 @@ int main()
 
 		// A handy little draw string function
 
-		drawString( "<- This is the font texture\nstb_truetype just made for us", 280.0f, 50.0f );
+		drawString( "<- This is the font texture\nstb_truetype just made for us", 280.0f, 0.0f );
 
-		drawString( input_text, 5.0f, 300.0f );
+		drawString( input_text, 5.0f, 280.0f );
 
 		SDL_RenderPresent(ren);
 	}
@@ -201,6 +201,10 @@ void drawString( const std::string& str, float x, float y )
 				&char_rect,
 				true );
 		}
+
+		// Personally, it makes more sense to me to specify the top left corner
+		char_rect.y0 += CHAR_HEIGHT;
+		char_rect.y1 += CHAR_HEIGHT;
 
 		//
 		// The resulting points s0, t0, s1, t0 are in texture coordinates
