@@ -72,8 +72,8 @@ int main()
 
 		if( font_buffer )
 		{
-			int result = stbtt_BakeFontBitmap(font_buffer, 0,
-				CHAR_HEIGHT,
+			int result = stbtt_BakeFontBitmap(
+				font_buffer, 0, CHAR_HEIGHT,
 				font_bitmap, BITMAP_SIZE, BITMAP_SIZE,
 				FIRST_CHAR, NUM_CHARS,
 				char_data);
@@ -156,8 +156,6 @@ int main()
 	SDL_StopTextInput();
 
 	shutdown();
-
-	SDL_Quit();
 	return 0;
 }
 
@@ -320,4 +318,6 @@ void shutdown()
 	SDL_DestroyTexture( font_texture );
 	SDL_DestroyRenderer( ren );
 	SDL_DestroyWindow( win );
+
+	SDL_Quit();
 }
