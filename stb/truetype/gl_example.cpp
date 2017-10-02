@@ -1,6 +1,7 @@
 #include "SDL2/sdl.h"
 #include <GL/glew.h>
 #include <string>
+#include <vector>
 
 #define STB_RECT_PACK_IMPLEMENTATION
 #include "stb_rect_pack.h"
@@ -19,11 +20,11 @@
 const int WINDOW_WIDTH    =   640;
 const int WINDOW_HEIGHT   =   480;
 
-const int BITMAP_SIZE     =   512; // Width and height of the bitmap I want to pack my font into
+const int BITMAP_SIZE     =   256; // Width and height of the bitmap I want to pack my font into
 const int FIRST_CHAR      =    32; // 32 corresponts to a space char in ASCII
 const int NUM_CHARS       =    95; // I want to get the 95 charaters following an ASCII space
 const int TEXT_MAX_LENGTH =  1024; // The maximum size of our input string
-const float CHAR_HEIGHT   = 80.0f; // Height of a character in pixels
+const float CHAR_HEIGHT   = 28.0f; // Height of a character in pixels
 
 //
 // Globals
@@ -50,6 +51,7 @@ stbtt_bakedchar char_data[NUM_CHARS];
 // Function forward declarations
 //
 
+void drawString( const char* str, float x, float y );
 unsigned char* createBitmapFromFont( const unsigned char* font_buffer );
 unsigned char* readEntireFile( const char* filename );
 GLuint create_shader( GLenum type, const char* source );
@@ -197,7 +199,7 @@ int main()
         }
         
         // Clear the screen
-        glClearColor( 0, 0.2, 0, 0 );
+        glClearColor( 0, 0, 0, 0 );
         glClear( GL_COLOR_BUFFER_BIT );
 
         // Draw buffers
@@ -205,11 +207,10 @@ int main()
         
         glActiveTexture( GL_TEXTURE0 );
         glBindTexture( GL_TEXTURE_2D, font_texture );
-        
-        glBindVertexArray( vao );
-        glBindBuffer( GL_ARRAY_BUFFER, vbo );
 
-        glDrawArrays( GL_TRIANGLES, 0, sizeof(verts)/9 );
+        drawString( "This is a test string.\nIt can even have newlines.", 0, 0 );
+
+        drawString( input_text.c_str(), 0, WINDOW_HEIGHT / 2 );
 
         // Show graphics
         SDL_GL_SwapWindow( sdl_window );
@@ -217,6 +218,113 @@ int main()
 
     shutdown();
     return 0;
+}
+
+void push2( std::vector<float>& v, float a, float b )
+{
+    v.push_back(a);
+    v.push_back(b);
+}
+
+void push3( std::vector<float>& v, float a, float b, float c )
+{
+    v.push_back(a);
+    v.push_back(b);
+    v.push_back(c);
+}
+
+void push4( std::vector<float>& v, float a, float b, float c, float d )
+{
+    v.push_back(a);
+    v.push_back(b);
+    v.push_back(c);
+    v.push_back(d);
+}
+
+void drawString( const char* str, float x, float y )
+{
+    const float START_X = x;
+    std::vector<float> verts;
+
+    for( const char* c = str; *c != 0; c++ )
+    {
+        if( *c == '\n' )
+        {
+            x = START_X;
+            y += CHAR_HEIGHT;
+            continue;
+        }
+
+        stbtt_aligned_quad char_rect;
+        int char_index = *c - FIRST_CHAR;
+
+        stbtt_GetBakedQuad(
+            char_data,
+            BITMAP_SIZE, BITMAP_SIZE,
+            char_index,
+            &x, &y,
+            &char_rect,
+            true );
+
+        if( char_rect.x1 > WINDOW_WIDTH )
+        {
+            //
+            // If the right hand edge of our new char will be off screen,
+            // reset the x position, increment the y position, and try again.
+            //
+
+            x = START_X;
+            y += CHAR_HEIGHT;
+
+            stbtt_GetBakedQuad(
+                char_data,
+                BITMAP_SIZE, BITMAP_SIZE,
+                char_index,
+                &x, &y,
+                &char_rect,
+                true );
+        }
+
+        char_rect.y0 += CHAR_HEIGHT;
+        char_rect.y1 += CHAR_HEIGHT;
+
+        char_rect.y0 *= -1;
+        char_rect.y1 *= -1;
+
+        char_rect.x0 = char_rect.x0 / (WINDOW_WIDTH / 2) - 1;
+        char_rect.x1 = char_rect.x1 / (WINDOW_WIDTH / 2) - 1;
+        char_rect.y0 = char_rect.y0 / (WINDOW_HEIGHT / 2) + 1;
+        char_rect.y1 = char_rect.y1 / (WINDOW_HEIGHT / 2) + 1;
+
+        push3( verts, char_rect.x0, char_rect.y0, 0.0f );   // position
+        push4( verts, 1.0f, 1.0f, 1.0f, 1.0f );             // colour
+        push2( verts, char_rect.s0, char_rect.t0 );         // texture coords
+
+        push3( verts, char_rect.x1, char_rect.y0, 0.0f );
+        push4( verts, 1.0f, 1.0f, 1.0f, 1.0f );
+        push2( verts, char_rect.s1, char_rect.t0 );
+
+        push3( verts, char_rect.x0, char_rect.y1, 0.0f );
+        push4( verts, 1.0f, 1.0f, 1.0f, 1.0f );
+        push2( verts, char_rect.s0, char_rect.t1 );
+
+        push3( verts, char_rect.x0, char_rect.y1, 0.0f );
+        push4( verts, 1.0f, 1.0f, 1.0f, 1.0f );
+        push2( verts, char_rect.s0, char_rect.t1 );
+
+        push3( verts, char_rect.x1, char_rect.y1, 0.0f );
+        push4( verts, 1.0f, 1.0f, 1.0f, 1.0f );
+        push2( verts, char_rect.s1, char_rect.t1 );
+
+        push3( verts, char_rect.x1, char_rect.y0, 0.0f );
+        push4( verts, 1.0f, 1.0f, 1.0f, 1.0f );
+        push2( verts, char_rect.s1, char_rect.t0 );
+    }
+
+    glBindVertexArray( vao );
+    glBindBuffer( GL_ARRAY_BUFFER, vbo );
+    glBufferData( GL_ARRAY_BUFFER, sizeof(verts[0])*verts.size(), verts.data(), GL_STREAM_DRAW );
+    glDrawArrays( GL_TRIANGLES, 0, verts.size()/9 );
 }
 
 unsigned char* createBitmapFromFont( const unsigned char* font_buffer )
