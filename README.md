@@ -16,6 +16,11 @@ Notes on the C++ language and some choice libraries, to help me remember things.
 		- What about the touch pad?
 		- Motion sensors?
 		- Button pressure?
+- graphics
+	- [x] floyd-steinbergh dithering
+		- [ ] ditch dependancy on SDL, take commmand line args and write result to file (stb_image_write or roll a PPM)
+	- [x] stb_truetype font rendering with SDL
+	- [x] stb_truetype font rendering with OpenGL
 - 2d physics
 	- [x] basic box2d example
 	- [ ] box2d joints
@@ -35,6 +40,7 @@ Notes on the C++ language and some choice libraries, to help me remember things.
 	- [ ] heap sort
 	- [ ] quick sort
 	- [ ] binary search
+	- [ ] radix sort
 - inheritance
 	- [ ] public, private, protected
 	- [ ] virtual functions, override, final
