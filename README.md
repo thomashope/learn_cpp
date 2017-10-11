@@ -18,7 +18,8 @@ Notes on the C++ language and some choice libraries, to help me remember things.
 		- Button pressure?
 - graphics
 	- [x] floyd-steinbergh dithering
-		- [ ] ditch dependancy on SDL, take commmand line args and write result to file (stb_image_write or roll a PPM)
+		- [x] ditch dependancy on SDL, take commmand line args and write result to file (stb_image_write or roll a PPM)
+	- [ ] palletize an image. Take an input image and palette, output the image using only the palette colours
 	- [x] stb_truetype font rendering with SDL
 	- [x] stb_truetype font rendering with OpenGL
 - 2d physics
