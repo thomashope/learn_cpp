@@ -1,0 +1,1 @@
+c++ main.cpp -lsdl2 -framework opengl -lglew -std=c++11
