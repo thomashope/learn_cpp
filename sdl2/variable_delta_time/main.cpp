@@ -84,8 +84,8 @@ int main()
         // time last frame `ticks` and `old_ticks`. We divide by 1000 because ticks are integers
         // in milliseconds.
         ticks = SDL_GetTicks();
-        delta_time = (ticks - old_ticks) / 1000.0f;
-        std::cout << "\rms/frame: " << ticks - old_ticks << "     " << std::flush;
+        delta_time = (ticks - old_ticks) / 1000.0f; 
+        printf("\rms/frame: %4d", ticks - old_ticks);
         old_ticks = ticks;
 
         //// Handle keyboard input

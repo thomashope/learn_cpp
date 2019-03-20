@@ -28,7 +28,7 @@
 // This should install the command line tools, glew.h, bullet and SDL2 and link them into /usr/local/lib/ and /usr/local/include/
 // The OpenGL frmaework should be installed by default on OSX
 //
-//  $ clang++ *.cpp -framework OpenGL -l SDL2 -lBulletSoftBody -lBulletDynamics -lBulletCollision -lLinearMath -I /usr/local/include/bullet/
+//  $ clang++ *.cpp -std=c++11 -framework OpenGL -l SDL2 -lBulletSoftBody -lBulletDynamics -lBulletCollision -lLinearMath -I /usr/local/include/bullet/
 //
 // Should compile all `cpp` files in the current directory into an executable called 'a.out'
 //
@@ -52,39 +52,38 @@ std::vector<btRigidBody*> bodies;
 struct PhysicsWorld
 {
     // Bullet physics world components
-    btDynamicsWorld*            world;
-    btDispatcher*               dispatcher;
-    btCollisionConfiguration*   collisionConfig;
-    btBroadphaseInterface*      broadphase;
-    btConstraintSolver*         solver;
+    btDynamicsWorld*            world               = nullptr;
+    btDispatcher*               dispatcher          = nullptr;
+    btCollisionConfiguration*   collisionConfig     = nullptr;
+    btBroadphaseInterface*      broadphase          = nullptr;
+    btConstraintSolver*         solver              = nullptr;
 
-    PhysicsWorld()
-    : world( NULL )
-    , dispatcher( NULL )
-    , collisionConfig( NULL )
-    , broadphase( NULL )
-    , solver( NULL )
-    {}
+    PhysicsWorld() {}
     ~PhysicsWorld() {}
 
     // Initialise the seperate bullet physics world components 
     void init()
     {
         collisionConfig = new btDefaultCollisionConfiguration();
-        dispatcher = new btCollisionDispatcher( collisionConfig );
-        broadphase = new btDbvtBroadphase();
-        solver = new btSequentialImpulseConstraintSolver();
-        world = new btDiscreteDynamicsWorld( dispatcher, broadphase, solver, collisionConfig );
+        dispatcher      = new btCollisionDispatcher( collisionConfig );
+        broadphase      = new btDbvtBroadphase();
+        solver          = new btSequentialImpulseConstraintSolver();
+        world           = new btDiscreteDynamicsWorld( dispatcher, broadphase, solver, collisionConfig );
         world->setGravity( btVector3( 0, -10, 0 ) );
     }
     
     void shutdown()
     {
-        if( world ) delete world ;
-        if( dispatcher ) delete dispatcher;
-        if( collisionConfig ) delete collisionConfig;
-        if( broadphase ) delete broadphase;
-        if( solver ) delete solver;
+        delete world;
+        world = nullptr;
+        delete dispatcher;
+        dispatcher = nullptr;
+        delete collisionConfig;
+        collisionConfig = nullptr;
+        delete broadphase;
+        broadphase = nullptr;
+        delete solver;
+        solver = nullptr;
     }
 
     // Add a sphere to the world
@@ -261,6 +260,10 @@ int main()
     float dt = 1.0f / 60.0f;
     while( !done )
     {
+        ticks = SDL_GetTicks();
+        dt = (ticks - old_ticks) / 1000.0f;
+        old_ticks = ticks;
+
         // Handle Events
         while( SDL_PollEvent( &event ) )
         {
