@@ -47,3 +47,5 @@ Notes on the C++ language and some choice libraries, to help me remember things.
 	- [ ] virtual functions, override, final
 	- [ ] multiple inheritence
 - smart pointers
+- curl
+	- [x] downloading a web page / file
