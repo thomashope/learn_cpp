@@ -449,14 +449,14 @@ void update(Platform& p)
 
 	if(p.mouse.l_pressed)
     {
-        if(hovered_point >= 0)
-        {
-            points[hovered_point] += vec2(p.mouse.dx, p.mouse.dy);
-        }
-        else
+        if(hovered_point < 0)
     	{
     		points.push_back({p.mouse.x, p.mouse.y});
     	}
+    }
+    else if(p.mouse.l_down && hovered_point >= 0)
+    {
+            points[hovered_point] += vec2(p.mouse.dx, p.mouse.dy);
     }
 
     pStart = pointOnCurve(points, tStart);
